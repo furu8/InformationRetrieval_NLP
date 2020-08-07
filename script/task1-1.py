@@ -5,4 +5,9 @@ def read_txt(path):
     df = df.rename(columns={'#http://disney.wikia.com/wiki/Frozen': 'doc'})
     return df
 
-df = read_txt('../data_file/raw/doc.txt')
+def main():
+    df = read_txt('../data_file/raw/doc.txt')
+
+
+if __name__ == "__main__":
+    main()
