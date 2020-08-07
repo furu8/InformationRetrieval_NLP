@@ -18,32 +18,39 @@ def pre_lower_word(doc_list):
 
     return doc_lower_str_list
 
-def pre_replace_word(doc_list, symbol_list):
+def pre_replace_word(doc, symbol_list):
     """
-    文書のsymbol_listの記号と空白文字を\nに置き換え
+    文書のsymbol_listの記号の除去とと空白文字を\nに置換
     """
-    doc_str_list = str(doc_list)
-    doc_sym_list = [doc_str_list.replace(sym, '\n') for sym in symbol_list]
-    print(doc_sym_list)
+    # symbolを除去
+    for sym in symbol_list:
+        doc = doc.replace(sym, '')
+    
+    # 空白を改行文字に
+    new_doc = doc.replace(' ', '\n')
 
+    return new_doc
 
 def preprocessing_word(df):
     """
     前処理をほどこす
     """
+    # 小文字変換
     doc_list = df.values # 二次元リスト
-    print([pre_lower_word(doc) for doc in doc_list])
-    # doc_lower_list = [pre_lower_word(doc) for doc in doc_list]
-    # print(np.array(doc_lower_list).shape)
-    # print(doc_lower_list)
-    symbol_list = ['(', ')', '"', '-', ' ']
-    # doc_sym_list = [pre_replace_word(doc, symbol_list) for doc in doc_lower_list]
+    doc_lower_list = [pre_lower_word(doc) for doc in doc_list] # 一次元リスト
+    
+    # 記号除去、空白置換
+    symbol_list = ['(', ')', '"', '-', ',', '.']
+    doc_sym_list = [pre_replace_word(doc, symbol_list) for doc in doc_lower_list]
 
-
+    return doc_sym_list
 
 def main():
     df = read_txt('../data_file/raw/doc.txt')
-    preprocessing_word(df)
+    word_doc_list = preprocessing_word(df)
+
+    for word in word_doc_list:
+        print(word)
 
 if __name__ == "__main__":
     main()
