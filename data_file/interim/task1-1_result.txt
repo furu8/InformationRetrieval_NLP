@@ -21,7 +21,9 @@ among
 them
 is
 an
-8yearold
+8
+year
+old
 boy
 named
 kristoff
@@ -49,7 +51,9 @@ at
 the
 same
 time
-5yearold
+5
+year
+old
 princess
 anna
 livvy
@@ -57,7 +61,9 @@ stubenrauch
 wakes
 her
 elder
-8yearold
+8
+year
+old
 sister
 princess
 elsa
@@ -501,7 +507,9 @@ flustered
 by
 the
 duke's
-overthetop
+over
+the
+top
 dancing
 skills
 this
@@ -1515,7 +1523,8 @@ to
 the
 trolls
 a
-mixup
+mix
+up
 occurs
 and
 the

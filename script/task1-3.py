@@ -30,7 +30,13 @@ def main():
     new_word_list = remove_stop_word(df, df_stop)
 
     # 出力
-
+    new_df = pd.DataFrame(new_word_list, columns=[['word']])
+    df = df.sort_values('word')
+    print(df)
+    new_df = pd.merge(new_df, df, how='outer')
+    
+    print(new_df)
+    # [print(word) for word in new_word_list] 
     
 if __name__ == "__main__":
     main()

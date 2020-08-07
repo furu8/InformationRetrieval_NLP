@@ -20,7 +20,9 @@ def pre_lower_word(doc_list):
 
 def pre_replace_word(doc, symbol_list):
     """
-    文書のsymbol_listの記号の除去とと空白文字を\nに置換
+    文書のsymbol_listの記号の除去
+    空白文字を\nに置換
+    「-」を\nに置換
     """
     # symbolを除去
     for sym in symbol_list:
@@ -28,6 +30,8 @@ def pre_replace_word(doc, symbol_list):
     
     # 空白を改行文字に
     new_doc = doc.replace(' ', '\n')
+    #「-」を改行文字に
+    new_doc = new_doc.replace('-', '\n')
 
     return new_doc
 
@@ -40,7 +44,7 @@ def preprocessing_word(df):
     doc_lower_list = [pre_lower_word(doc) for doc in doc_list] # 一次元リスト
     
     # 記号除去、空白置換
-    symbol_list = ['(', ')', '"', '-', ',', '.']
+    symbol_list = ['(', ')', '"', ',', '.']
     doc_sym_list = [pre_replace_word(doc, symbol_list) for doc in doc_lower_list]
 
     return doc_sym_list
