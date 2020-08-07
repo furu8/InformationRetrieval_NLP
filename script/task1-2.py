@@ -17,13 +17,11 @@ def main():
     # 読み込み
     df = read_txt('../data_file/interim/task1-1_result.txt')
 
+    # カウント数計算
+    df_count = calc_word_count(df)
+    
     # カウント数出力
-    
-    print(df_count)
-    
-
-    # for c in df_count.values:
-    #     print(c)
+    [print('{:<15}\t {}'.format(cnt[0], cnt[1])) for cnt in df_count.values] # brokenheartedlyが15文字で最大
 
 if __name__ == "__main__":
     main()
