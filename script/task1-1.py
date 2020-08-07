@@ -46,11 +46,14 @@ def preprocessing_word(df):
     return doc_sym_list
 
 def main():
+    # 読み込み
     df = read_txt('../data_file/raw/doc.txt')
+
+    # 前処理
     word_doc_list = preprocessing_word(df)
 
-    for word in word_doc_list:
-        print(word)
+    # 出力
+    [print(word) for word in word_doc_list]
 
 if __name__ == "__main__":
     main()
