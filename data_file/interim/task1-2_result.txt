@@ -1,0 +1,12 @@
+the           190
+to            156
+and            97
+her            69
+anna           68
+             ... 
+trapping        1
+josh            1
+intervenes      1
+speak           1
+know            1
+Name: word, Length: 965, dtype: int64
