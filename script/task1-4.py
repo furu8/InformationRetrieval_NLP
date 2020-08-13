@@ -33,6 +33,5 @@ def main():
     # 保存
     new_df.to_csv('../data_file/interim/task1-4_result.txt', sep='\t')
 
-
 if __name__ == "__main__":
     main()
