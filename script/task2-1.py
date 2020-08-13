@@ -1,5 +1,11 @@
 import pandas as pd
 import numpy as np
+import re
+
+def print_preprocessing_debug(doc_list):
+    print('# httpsデバッグ') # httpsデバッグ
+    print(doc_list[45989], end='')
+    print(re.sub(r'https?://[\w/:%#\$&\?\(\)~\.=\+\-…]+', "", doc_list[45989]))
 
 def read_txt(path):
     with open(path, 'r') as f:
@@ -8,16 +14,21 @@ def read_txt(path):
         title_list = [doc_dict[i] for i in range(1, len(doc_dict)-1) if doc_dict[i-1] == '\n' and doc_dict[i+1] == '\n']
         # 記事だけ抽出
         doc_list = [doc_dict[i] for i in range(1, len(doc_dict)-1) if doc_dict[i-1] != '\n' or doc_dict[i+1] != '\n']
-        
-        
-
-        for i, doc in enumerate(title_list):
-            if i == 150:
-                break
-            print(doc, end='')
+    
+    return title_list, doc_list
 
 def main():
-    read_txt('../data_file/raw/doc_set.txt')
+    # テキストから記事のタイトルと内容を取得
+    titile_list, doc_list = read_txt('../data_file/raw/doc_set.txt')
+
+    # 前処理debug
+    print_preprocessing_debug(doc_list) 
+
+    # 前処理
+    # doc_list = [doc for doc in doc_list if doc != '\n'] # 改行文字しかない要素を除外
+    
+    
+
 
 if __name__ == "__main__":
     main()
