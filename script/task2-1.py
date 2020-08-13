@@ -6,6 +6,13 @@ def print_preprocessing_debug(doc_list):
     print('# httpsデバッグ') # httpsデバッグ
     print(doc_list[45989], end='')
     print(re.sub(r'https?://[\w/:%#\$&\?\(\)~\.=\+\-…]+', "", doc_list[45989]))
+    print('#半角記号,数字,英字') #半角記号,数字,英字
+    print(doc_list[6])
+    print(re.sub(r'[~`!@#$%^&*()-+={}|.,<>/?:;"[\]\'\\]', "", doc_list[6]))
+    print('# 半角記号,数字,英字') # 半角記号,数字,英字
+    print(doc_list[6])
+    print(re.sub(r'[-]', "", doc_list[6]))
+    # text=re.sub(r'[︰；’”「」-＠]', "", text)#全角記号
 
 def read_txt(path):
     with open(path, 'r') as f:
