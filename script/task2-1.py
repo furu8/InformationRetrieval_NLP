@@ -110,8 +110,19 @@ def generate_df(new_doc_list):
     """
     # インデックス
     word_index_list = make_word_index(new_doc_list)
+
+def make_article_dict(title_list, article_list):
+    article_dict = {title: article for title, article in zip(title_list, article_list)}
+    return article_dict
+
+def concat_article_line(article, doc):
+    word_list = doc.split(' ')
+    article_one_line = ' '.join(word_list) # 単語リストを空白切りに
+    article += article_one_line + ' ' # 連結
+
+    return article
     
-def concat_article_line(title_list, doc_list):
+def generate_article_dict(title_list, doc_list):
     """
     一行ずつの記事の内容と記事ごとに連結
     連結した記事を辞書型で紐付けて返却
@@ -119,9 +130,11 @@ def concat_article_line(title_list, doc_list):
     blank_count_list = [] # 空文字をカウントする
     article_list = []     # 記事ごとのリスト
     article = ''          # 記事を連結する一時変数
-
+    
+    # 記事連結処理
     for i, doc in enumerate(doc_list):
         if doc == doc_list[-1]: # 記事の最後に到達したときの例外処理
+            article = concat_article_line(article, doc)
             article_list.append(article)
         elif doc == '': # 空文字のときカウント
             blank_count_list.append(i)
@@ -132,11 +145,10 @@ def concat_article_line(title_list, doc_list):
                 article = '' # 初期化
         else: # 記事の内容の一文を連結
             blank_count_list.clear()
-            word_list = doc.split(' ')
-            article_one_line = ' '.join(word_list) # 単語リストを空白切りに
-            article += article_one_line + ' ' # 連結
+            article = concat_article_line(article, doc)
 
-    return {title: article for title, article in zip(title_list, article_list)}
+    # 辞書型にして返却
+    return make_article_dict(title_list, article_list)
 
 def main():
     # テキストから記事のタイトルと内容を取得
@@ -148,8 +160,8 @@ def main():
     new_title_list = [remove_newline(title) for title in title_list]
     # word_index_list = make_word_index(new_doc_list)
     
-    article_dict = concat_article_line(title_list, new_doc_list)
-    print(new_title_list)
+    article_dict = generate_article_dict(new_title_list, new_doc_list)
+    
     print(article_dict['Stanley Hall, Clayfield'])
     
 
