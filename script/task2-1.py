@@ -92,6 +92,34 @@ def generate_df(new_doc_list):
     # インデックス
     word_index_list = make_word_index(new_doc_list)
     
+def make_article_dict(title_list, doc_list):
+    """
+    記事のタイトルと内容を辞書型で紐付ける
+    """
+    for title, doc in zip(title_list, article_list):
+        pass
+
+def concat_article_line(title_list, doc_list):
+    blank_count_list = [] # 空文字をカウントする
+    article_list = []     # 記事ごとのリスト
+    article = ''          # 記事を連結する一時変数
+
+    for i, doc in enumerate(new_doc_list):
+        if doc == new_doc_list[-1]: # 記事の最後に到達したときの例外処理
+            article_list.append(article)
+        elif doc == '': # 空文字のときカウント
+            blank_count_list.append(i)
+            # 空文字が3に達したとき、articleが一つの記事になっている
+            if len(blank_count_list) == 3:
+                blank_count_list.clear()
+                article_list.append(article)
+                article = '' # 初期化
+        else: # 記事の内容の一文を連結
+            blank_count_list.clear()
+            word_list = doc.split(' ')
+            article_one_line = ' '.join(word_list) # 単語リストを空白切りに
+            article += article_one_line + ' ' # 連結
+
 
 def main():
     # テキストから記事のタイトルと内容を取得
@@ -120,10 +148,6 @@ def main():
             word_list = doc.split(' ')
             article_one_line = ' '.join(word_list)
             article += article_one_line + ' '
-
-    print(len(article_list))
-    print(len(title_list))
-
 
 if __name__ == "__main__":
     main()
