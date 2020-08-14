@@ -37,21 +37,40 @@ def read_txt(path):
     
     return title_list, doc_list
 
+def remove_url(doc):
+    return re.sub(r'https?://[\w/:%#\$&\?\(\)~\.=\+\-…]+', "", doc)
+
+def remove_newline(doc):
+    return re.sub(r'[\n]', "", doc)
+
+def replace_apostrophe(doc):
+    # 置換すればpeople’sがpeople'sとして扱えるが、'mental enslavement'などが残る
+    return re.sub(r'[‘’]', "'", doc)
+
+def remove_en(doc):
+    return re.sub(r'[~`!@#$%^&*()\-━+={}|.,<>/?:;"[\]\'\\]', "", doc)
+
+def remove_em(doc):
+    return re.sub(r'[︰”「」@]', "", doc)
+
 def remove_symbol_word(doc):
+    """
+    不要な記号を除去
+    """
     # https
-    # new_doc = re.sub(r'https?://[\w/:%#\$&\?\(\)~\.=\+\-…]+', "", doc)
+    # new_doc = remove_url(doc)
 
     # \\n削除
-    new_doc = re.sub(r'[\n]', "", doc)
+    new_doc = remove_newline(doc)
 
     # [‘]と[’]を[']に置換
-    # new_doc = (re.sub(r'[‘’]', "'", new_doc) # 置換すればpeople’sがpeople'sとして扱えるが、'mental enslavement'などが残る
+    # new_doc = replace_apostrophe(new_doc)
     
     # 半角記号
-    new_doc = re.sub(r'[~`!@#$%^&*()\-━+={}|.,<>/?:;"[\]\'\\]', "", new_doc)
-    
+    new_doc = remove_en(new_doc)
+
     # 全角記号
-    new_doc = re.sub(r'[︰”「」@]', "", new_doc)
+    new_doc = remove_em(new_doc)
 
     return new_doc
 
@@ -92,20 +111,17 @@ def generate_df(new_doc_list):
     # インデックス
     word_index_list = make_word_index(new_doc_list)
     
-def make_article_dict(title_list, doc_list):
-    """
-    記事のタイトルと内容を辞書型で紐付ける
-    """
-    for title, doc in zip(title_list, article_list):
-        pass
-
 def concat_article_line(title_list, doc_list):
+    """
+    一行ずつの記事の内容と記事ごとに連結
+    連結した記事を辞書型で紐付けて返却
+    """
     blank_count_list = [] # 空文字をカウントする
     article_list = []     # 記事ごとのリスト
     article = ''          # 記事を連結する一時変数
 
-    for i, doc in enumerate(new_doc_list):
-        if doc == new_doc_list[-1]: # 記事の最後に到達したときの例外処理
+    for i, doc in enumerate(doc_list):
+        if doc == doc_list[-1]: # 記事の最後に到達したときの例外処理
             article_list.append(article)
         elif doc == '': # 空文字のときカウント
             blank_count_list.append(i)
@@ -120,6 +136,7 @@ def concat_article_line(title_list, doc_list):
             article_one_line = ' '.join(word_list) # 単語リストを空白切りに
             article += article_one_line + ' ' # 連結
 
+    return {title: article for title, article in zip(title_list, article_list)}
 
 def main():
     # テキストから記事のタイトルと内容を取得
@@ -127,27 +144,14 @@ def main():
 
     # 前処理
     # print_preprocessing_debug(doc_list) # 前処理確認デバッグ
-    # doc_list = [doc for doc in doc_list if doc != '\n'] # 改行文字しかない要素を除外
     new_doc_list = preprocessing_doc(doc_list)
+    new_title_list = [remove_newline(title) for title in title_list]
     # word_index_list = make_word_index(new_doc_list)
     
-    blank_count_list = []
-    article_list = []
-    article = ''
-    for i, doc in enumerate(new_doc_list):
-        if doc == new_doc_list[-1]:
-            article_list.append(article)
-        elif doc == '':
-            blank_count_list.append(i)
-            if len(blank_count_list) == 3:
-                blank_count_list.clear()
-                article_list.append(article)
-                article = ''
-        else:
-            blank_count_list.clear()
-            word_list = doc.split(' ')
-            article_one_line = ' '.join(word_list)
-            article += article_one_line + ' '
+    article_dict = concat_article_line(title_list, new_doc_list)
+    print(new_title_list)
+    print(article_dict['Stanley Hall, Clayfield'])
+    
 
 if __name__ == "__main__":
     main()
