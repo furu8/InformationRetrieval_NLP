@@ -1,33 +1,34 @@
 import pandas as pd
 import numpy as np
 import re
+from sklearn.feature_extraction.text import CountVectorizer
 
 def print_preprocessing_debug(doc_list):
     print('# https') # https
-    print(doc_list[45989])
-    print(re.sub(r'https?://[\w/:%#\$&\?\(\)~\.=\+\-…]+', "", doc_list[45989]))
+    print(doc_list[261134])
+    print(re.sub(r'https?://[\w/:%#\$&\?\(\)~\.=\+\-…]+', "", doc_list[261134]))
 
-    print('#半角記号') #半角記号
-    print(doc_list[6977])
-    print(re.sub(r'[~`!@#$%^&*()\-━+={}|.,<>/?:;"[\]\'\\]', "", doc_list[6977]))
+    # print('#半角記号') #半角記号
+    # print(doc_list[6977])
+    # print(re.sub(r'[~`!@#$%^&*()\-━+={}|.,<>/?:;"[\]\'\\]', "", doc_list[6977]))
 
-    print('# 全角記号') # 全角記号
-    print(doc_list[18309])
-    print(re.sub(r'[︰”「」@]', "", doc_list[18309]))
+    # print('# 全角記号') # 全角記号
+    # print(doc_list[18309])
+    # print(re.sub(r'[︰”「」@]', "", doc_list[18309]))
 
-    print("# [’]を[']に置換") # [’]を[']に置換
-    print(doc_list[15])
-    print(re.sub(r'[‘’]', "'", doc_list[15]))
+    # print("# [’]を[']に置換") # [’]を[']に置換
+    # print(doc_list[15])
+    # print(re.sub(r'[‘’]', "'", doc_list[15]))
 
-    print('# 大文字小文字変換') # 大文字小文字変換
-    print(doc_list[2])
-    print(doc_list[2].lower())
+    # print('# 大文字小文字変換') # 大文字小文字変換
+    # print(doc_list[2])
+    # print(doc_list[2].lower())
 
-    print('# \\n削除') # \\n削除
-    print(doc_list[2])
-    print(re.sub(r'[\n]', "", doc_list[2]))
+    # print('# \\n削除') # \\n削除
+    # print(doc_list[2])
+    # print(re.sub(r'[\n]', "", doc_list[2]))
 
-def read_txt(path):
+def read_doc_txt(path):
     with open(path, 'r') as f:
         doc_list = f.readlines()
         # 記事のタイトルだけ抽出（index番号が文書番号となる）
@@ -36,6 +37,11 @@ def read_txt(path):
         doc_list = [doc_list[i] for i in range(1, len(doc_list)) if doc_list[i-1] != '\n' or doc_list[i+1] != '\n']
     
     return title_list, doc_list
+
+def read_stop_words(path):
+    df = pd.read_csv(path, sep='\n')
+    df = df.rename(columns={'#http://www.textfixer.com/resources/common-english-words.txt': 'stop_word'})
+    return df
 
 def remove_url(doc):
     return re.sub(r'https?://[\w/:%#\$&\?\(\)~\.=\+\-…]+', "", doc)
@@ -58,7 +64,7 @@ def remove_symbol_word(doc):
     不要な記号を除去
     """
     # https
-    # new_doc = remove_url(doc)
+    new_doc = remove_url(doc)
 
     # \\n削除
     new_doc = remove_newline(doc)
@@ -82,7 +88,7 @@ def preprocessing_doc(doc_list):
     doc_lower_list = [doc.lower() for doc in doc_list]
     
     # 記号除去
-    doc_sym_list = [remove_symbol_word(doc) for doc in doc_lower_list]
+    doc_sym_list = [remove_symbol_word(doc) for doc in doc_list]
 
     # \xa0を除去
     new_doc_list = [doc.replace('\xa0', ' ') for doc in doc_sym_list]
@@ -104,12 +110,22 @@ def make_word_index(doc_list):
 
     return word_index_list
 
-def generate_df(new_doc_list):
+def generate_df(article_dict):
     """
     単語文書行列を作成
     """
-    # インデックス
-    word_index_list = make_word_index(new_doc_list)
+    # ストップワード
+    df_stop = read_stop_words('../data_file/raw/stop_words_list(UTF-8).txt')
+    stop_words = list(df_stop.values.flatten())
+    
+    # 単語の出現回数をカウント
+    doc_list = np.array(list(article_dict.values()))
+    cv = CountVectorizer(stop_words=stop_words)
+    cv.fit(doc_list)
+    freq_word_list = cv.transform(doc_list)
+
+    # データフレーム形式で先頭5行まで表示
+    print(pd.DataFrame(freq_word_list.toarray(), columns=cv.get_feature_names()))
 
 def make_article_dict(title_list, article_list):
     article_dict = {title: article for title, article in zip(title_list, article_list)}
@@ -119,7 +135,6 @@ def concat_article_line(article, doc):
     word_list = doc.split(' ')
     article_one_line = ' '.join(word_list) # 単語リストを空白切りに
     article += article_one_line + ' ' # 連結
-
     return article
     
 def generate_article_dict(title_list, doc_list):
@@ -152,17 +167,19 @@ def generate_article_dict(title_list, doc_list):
 
 def main():
     # テキストから記事のタイトルと内容を取得
-    title_list, doc_list = read_txt('../data_file/raw/doc_set.txt')
+    title_list, doc_list = read_doc_txt('../data_file/raw/doc_set.txt')
 
     # 前処理
-    # print_preprocessing_debug(doc_list) # 前処理確認デバッグ
-    new_doc_list = preprocessing_doc(doc_list)
-    new_title_list = [remove_newline(title) for title in title_list]
-    # word_index_list = make_word_index(new_doc_list)
+    print_preprocessing_debug(doc_list) # 前処理確認デバッグ
+    # new_doc_list = preprocessing_doc(doc_list) # 記事の内容の前処理
+    # new_title_list = [remove_newline(title) for title in title_list] # 記事のタイトルの前処理(改行文字除去)
+        
+    # # 記事辞書の作成
+    # article_dict = generate_article_dict(new_title_list, new_doc_list)
+    # print(article_dict['Stanley Hall, Clayfield'])
     
-    article_dict = generate_article_dict(new_title_list, new_doc_list)
-    
-    print(article_dict['Stanley Hall, Clayfield'])
+    # generate_df(article_dict)
+
     
 
 if __name__ == "__main__":
