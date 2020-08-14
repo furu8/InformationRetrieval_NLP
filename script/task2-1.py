@@ -4,15 +4,20 @@ import re
 
 def print_preprocessing_debug(doc_list):
     print('# httpsデバッグ') # httpsデバッグ
-    print(doc_list[45989], end='')
+    print(doc_list[45989])
     print(re.sub(r'https?://[\w/:%#\$&\?\(\)~\.=\+\-…]+', "", doc_list[45989]))
+
     print('#半角記号,数字,英字') #半角記号,数字,英字
     print(doc_list[6])
-    print(re.sub(r'[~`!@#$%^&*()-+={}|.,<>/?:;"[\]\'\\]', "", doc_list[6]))
-    print('# 半角記号,数字,英字') # 半角記号,数字,英字
-    print(doc_list[6])
-    print(re.sub(r'[-]', "", doc_list[6]))
-    # text=re.sub(r'[︰；’”「」-＠]', "", text)#全角記号
+    print(re.sub(r'[~`!@#$%^&*()\-+={}|.,<>/?:;"[\]\'\\]', "", doc_list[6]))
+
+    print('# 全角記号') # 全角記号
+    print(doc_list[18309])
+    print(re.sub(r'[︰”「」@]', "", doc_list[18309]))
+
+    print("# [’]を[']に置換") # [’]を[']に置換
+    print(doc_list[15])
+    print(re.sub(r'[‘’]', "'", doc_list[15]))
 
 def read_txt(path):
     with open(path, 'r') as f:
