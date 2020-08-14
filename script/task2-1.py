@@ -44,7 +44,7 @@ def remove_symbol_word(doc):
     # \\n削除
     new_doc = re.sub(r'[\n]', "", new_doc)
 
-    # # [‘]と[’]を[']に置換
+    # [‘]と[’]を[']に置換
     # new_doc = (re.sub(r'[‘’]', "'", new_doc) # 置換すればpeople’sがpeople'sとして扱えるが、'mental enslavement'などが残る
     
     # 半角記号
@@ -55,7 +55,7 @@ def remove_symbol_word(doc):
 
     return new_doc
 
-def preprocessing_word(doc_list):
+def preprocessing_doc(doc_list):
     """
     前処理をほどこす
     """
@@ -65,7 +65,14 @@ def preprocessing_word(doc_list):
     # 記号除去
     doc_sym_list = [remove_symbol_word(doc) for doc in doc_lower_list]
 
-    return doc_sym_list
+    # 余計な空白を除去
+    new_doc_list = [doc.replace('   ', ' ') for doc in doc_sym_list]
+    new_doc_list = [doc.replace('  ', ' ') for doc in new_doc_list]
+
+    return new_doc_list
+
+def make_df(title_list, new_doc_list):
+    pass
 
 def main():
     # テキストから記事のタイトルと内容を取得
@@ -73,9 +80,15 @@ def main():
 
     # 前処理
     # print_preprocessing_debug(doc_list) # 前処理確認デバッグ
-    doc_list = [doc for doc in doc_list if doc != '\n'] # 改行文字しかない要素を除外
-    new_doc_list = preprocessing_word(doc_list)
+    # doc_list = [doc for doc in doc_list if doc != '\n'] # 改行文字しかない要素を除外
+    new_doc_list = preprocessing_doc(doc_list)
+    
+    for i, doc in enumerate(new_doc_list):
+        word = doc.split(' ')
         
+        if i == 150:
+            break
+
 
 if __name__ == "__main__":
     main()
