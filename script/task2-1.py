@@ -4,13 +4,32 @@ import re
 from sklearn.feature_extraction.text import CountVectorizer
 
 def print_preprocessing_debug(doc_list):
-    print('# https') # https
-    print(doc_list[261134])
-    print(re.sub(r'https?://[\w/:%#\$&\?\(\)~\.=\+\-…]+', "", doc_list[261134]))
+    # print('# https') # https
+    # print(doc_list[261134])
+    # print(re.sub(r'https?://[\w/:%#\$&\?\(\)~\.=\+\-…]+', "", doc_list[261134]))
+    # print(doc_list[270337])
+    # print(re.sub(r'https?://[\w/:%#\$&\?\(\)~\.=\+\-…]+', "", doc_list[270334]), end='')
+    # print(re.sub(r'https?://[\w/:%#\$&\?\(\)~\.=\+\-…]+', "", doc_list[270335]), end='')
+    # print(re.sub(r'https?://[\w/:%#\$&\?\(\)~\.=\+\-…]+', "", doc_list[270336]), end='')
+    # print(re.sub(r'https?://[\w/:%#\$&\?\(\)~\.=\+\-…]+', "", doc_list[270337]), end='')
+    # print(re.sub(r'https?://[\w/:%#\$&\?\(\)~\.=\+\-…]+', "", doc_list[270338]), end='')
+    # print(re.sub(r'https?://[\w/:%#\$&\?\(\)~\.=\+\-…]+', "", doc_list[270339]), end='')
+    # print(re.sub(r'https?://[\w/:%#\$&\?\(\)~\.=\+\-…]+', "", doc_list[270340]), end='')
+    # print(re.sub(r'https?://[\w/:%#\$&\?\(\)~\.=\+\-…]+', "", doc_list[270341]), end='')
 
     # print('#半角記号') #半角記号
     # print(doc_list[6977])
     # print(re.sub(r'[~`!@#$%^&*()\-━+={}|.,<>/?:;"[\]\'\\]', "", doc_list[6977]))
+    print(doc_list[267193])
+    print(re.sub(r'[~`!@#$%^&*()\-━+={}|.,<>/?:;"[\]\'\\]', "", doc_list[267191]), end='')
+    print(re.sub(r'[~`!@#$%^&*()\-━+={}|.,<>/?:;"[\]\'\\]', "", doc_list[267192]), end='')
+    print(re.sub(r'[~`!@#$%^&*()\-━+={}|.,<>/?:;"[\]\'\\]', "", doc_list[267193]), end='')
+    print(re.sub(r'[~`!@#$%^&*()\-━+={}|.,<>/?:;"[\]\'\\]', "", doc_list[267194]), end='')
+    print(re.sub(r'[~`!@#$%^&*()\-━+={}|.,<>/?:;"[\]\'\\]', "", doc_list[267195]), end='')
+    print(re.sub(r'[~`!@#$%^&*()\-━+={}|.,<>/?:;"[\]\'\\]', "", doc_list[267196]), end='')
+    print(re.sub(r'[~`!@#$%^&*()\-━+={}|.,<>/?:;"[\]\'\\]', "", doc_list[267197]), end='')
+    print(re.sub(r'[~`!@#$%^&*()\-━+={}|.,<>/?:;"[\]\'\\]', "", doc_list[267198]), end='')
+    print(re.sub(r'[~`!@#$%^&*()\-━+={}|.,<>/?:;"[\]\'\\]', "", doc_list[267199]), end='')
 
     # print('# 全角記号') # 全角記号
     # print(doc_list[18309])
@@ -63,11 +82,11 @@ def remove_symbol_word(doc):
     """
     不要な記号を除去
     """
-    # https
-    new_doc = remove_url(doc)
-
     # \\n削除
     new_doc = remove_newline(doc)
+
+    # https
+    # new_doc = remove_url(new_doc)
 
     # [‘]と[’]を[']に置換
     # new_doc = replace_apostrophe(new_doc)
@@ -142,9 +161,10 @@ def generate_article_dict(title_list, doc_list):
     一行ずつの記事の内容と記事ごとに連結
     連結した記事を辞書型で紐付けて返却
     """
-    blank_count_list = [] # 空文字をカウントする
+    blank_count = 0       # 空文字をカウントする
     article_list = []     # 記事ごとのリスト
     article = ''          # 記事を連結する一時変数
+    isblank = False
     
     # 記事連結処理
     for i, doc in enumerate(doc_list):
@@ -152,16 +172,23 @@ def generate_article_dict(title_list, doc_list):
             article = concat_article_line(article, doc)
             article_list.append(article)
         elif doc == '': # 空文字のときカウント
-            blank_count_list.append(i)
+            blank_count += 1
+            if doc_list[i+1] == '':
+                isblank = True
+            else:
+                isblank = False
             # 空文字が3に達したとき、articleが一つの記事になっている
-            if len(blank_count_list) == 3:
-                blank_count_list.clear()
+            if not isblank:
+                blank_count = 0
                 article_list.append(article)
+                # print(article)
                 article = '' # 初期化
         else: # 記事の内容の一文を連結
-            blank_count_list.clear()
+            blank_count = 0
             article = concat_article_line(article, doc)
 
+    print(len(article_list))
+    print(len(title_list))
     # 辞書型にして返却
     return make_article_dict(title_list, article_list)
 
@@ -170,12 +197,14 @@ def main():
     title_list, doc_list = read_doc_txt('../data_file/raw/doc_set.txt')
 
     # 前処理
-    print_preprocessing_debug(doc_list) # 前処理確認デバッグ
-    # new_doc_list = preprocessing_doc(doc_list) # 記事の内容の前処理
-    # new_title_list = [remove_newline(title) for title in title_list] # 記事のタイトルの前処理(改行文字除去)
-        
-    # # 記事辞書の作成
-    # article_dict = generate_article_dict(new_title_list, new_doc_list)
+    # print_preprocessing_debug(doc_list) # 前処理確認デバッグ
+    new_doc_list = preprocessing_doc(doc_list) # 記事の内容の前処理
+    new_title_list = [remove_newline(title) for title in title_list] # 記事のタイトルの前処理(改行文字除去)
+    
+    # 記事辞書の作成
+    article_dict = generate_article_dict(new_title_list, new_doc_list)
+    # print('\nanegpur')
+    # print(article_dict['Balvantray Mehta Vidya Bhawan Anguridevi Shersingh'])
     # print(article_dict['Stanley Hall, Clayfield'])
     
     # generate_df(article_dict)
