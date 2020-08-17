@@ -136,15 +136,18 @@ def generate_df(article_dict):
     # ストップワード
     df_stop = read_stop_words('../data_file/raw/stop_words_list(UTF-8).txt')
     stop_words = list(df_stop.values.flatten())
-    
+
     # 単語の出現回数をカウント
     doc_list = np.array(list(article_dict.values()))
     cv = CountVectorizer(stop_words=stop_words)
     cv.fit(doc_list)
-    freq_word_list = cv.transform(doc_list)
+    freq_word_list = cv.transform(doc_list).toarray()
 
     # データフレーム形式で先頭5行まで表示
-    print(pd.DataFrame(freq_word_list.toarray(), columns=cv.get_feature_names()))
+    freq_word_df = pd.DataFrame(freq_word_list, columns=cv.get_feature_names())
+    # print(freq_word_df)
+
+    return freq_word_df
 
 def make_article_dict(title_list, article_list):
     article_dict = {title: article for title, article in zip(title_list, article_list)}
@@ -164,31 +167,30 @@ def generate_article_dict(title_list, doc_list):
     blank_count = 0       # 空文字をカウントする
     article_list = []     # 記事ごとのリスト
     article = ''          # 記事を連結する一時変数
-    isblank = False
+    isblank = False       # 次の行が空白かどうかフラグ
     
     # 記事連結処理
     for i, doc in enumerate(doc_list):
         if doc == doc_list[-1]: # 記事の最後に到達したときの例外処理
             article = concat_article_line(article, doc)
             article_list.append(article)
-        elif doc == '': # 空文字のときカウント
-            blank_count += 1
-            if doc_list[i+1] == '':
-                isblank = True
-            else:
-                isblank = False
-            # 空文字が3に達したとき、articleが一つの記事になっている
+        elif doc == '': # 空文字のとき
+            blank_count += 1 # 空白の数をカウント
+            isblank = True if doc_list[i+1] == '' else False # 次の行が空白かどうか判定
+            # 空文字が3以上かつ、次の行が空白ではないとき、articleが一つの記事になっている
             if blank_count >= 3 and not isblank:
                 blank_count = 0
                 article_list.append(article)
-                # print(article)
                 article = '' # 初期化
         else: # 記事の内容の一文を連結
-            blank_count = 0
+            blank_count = 0 # 初期化
             article = concat_article_line(article, doc)
 
     # 辞書型にして返却
     return make_article_dict(title_list, article_list)
+
+def calc_tf_idf(df):
+    pass
 
 def main():
     # テキストから記事のタイトルと内容を取得
@@ -201,11 +203,12 @@ def main():
     
     # 記事辞書の作成
     article_dict = generate_article_dict(new_title_list, new_doc_list)
-    # print('\nanegpur')
-    # print(article_dict['Balvantray Mehta Vidya Bhawan Anguridevi Shersingh'])
-    # print(article_dict['Stanley Hall, Clayfield'])
     
-    # generate_df(article_dict)
+    # 単語文書行列を作成
+    freq_word_df = generate_df(article_dict)
+
+    # tf-idf
+    calc_tf_idf(freq_word_df)
 
     
 
