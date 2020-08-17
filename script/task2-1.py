@@ -63,7 +63,7 @@ def read_stop_words(path):
     return df
 
 def remove_url(doc):
-    return re.sub(r'https?://[\w/:%#\$&\?\(\)~\.=\+\-…]+', "", doc)
+    return re.sub(r'https?://[\w/:%#\$&\?\(\)~\.\,=\+\-…]+', "", doc)
 
 def remove_newline(doc):
     return re.sub(r'[\n]', "", doc)
@@ -86,7 +86,7 @@ def remove_symbol_word(doc):
     new_doc = remove_newline(doc)
 
     # https
-    # new_doc = remove_url(new_doc)
+    new_doc = remove_url(new_doc)
 
     # [‘]と[’]を[']に置換
     # new_doc = replace_apostrophe(new_doc)
@@ -107,7 +107,7 @@ def preprocessing_doc(doc_list):
     doc_lower_list = [doc.lower() for doc in doc_list]
     
     # 記号除去
-    doc_sym_list = [remove_symbol_word(doc) for doc in doc_list]
+    doc_sym_list = [remove_symbol_word(doc) for doc in doc_lower_list]
 
     # \xa0を除去
     new_doc_list = [doc.replace('\xa0', ' ') for doc in doc_sym_list]
@@ -178,7 +178,7 @@ def generate_article_dict(title_list, doc_list):
             else:
                 isblank = False
             # 空文字が3に達したとき、articleが一つの記事になっている
-            if not isblank:
+            if blank_count >= 3 and not isblank:
                 blank_count = 0
                 article_list.append(article)
                 # print(article)
@@ -187,8 +187,6 @@ def generate_article_dict(title_list, doc_list):
             blank_count = 0
             article = concat_article_line(article, doc)
 
-    print(len(article_list))
-    print(len(title_list))
     # 辞書型にして返却
     return make_article_dict(title_list, article_list)
 
