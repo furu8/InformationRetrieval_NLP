@@ -44,7 +44,7 @@ def preprocessing_word(df):
     doc_lower_list = [pre_lower_word(doc) for doc in doc_list] # 一次元リスト
     
     # 記号除去、空白置換
-    symbol_list = ['(', ')', '"', ',', '.']
+    symbol_list = ['(', ')', '"', ',', '.', ':', ';']
     doc_sym_list = [pre_replace_word(doc, symbol_list) for doc in doc_lower_list]
 
     return doc_sym_list

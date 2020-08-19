@@ -195,13 +195,8 @@ def calc_tfidf(article_dict):
     df_stop = read_stop_words('../data_file/raw/stop_words_list(UTF-8).txt')
     stop_words = list(df_stop.values.flatten())
 
-    # 単語の出現回数をカウント
-    doc_list = np.array(list(article_dict.values()))
-    cv = CountVectorizer(stop_words=stop_words)
-    cv.fit(doc_list)
-    freq_word_list = cv.transform(doc_list).toarray()
-
     # 単語のTF-IDFを計算
+    doc_list = np.array(list(article_dict.values()))
     tv = TfidfVectorizer(stop_words=stop_words)
     tv.fit(doc_list)
     tfidf_list = tv.transform(doc_list).toarray()
@@ -216,21 +211,26 @@ def input_keyword():
     keyword_list = [word for word in search_word.split(' ')]
     return keyword_list
 
-def get_doc_number(df):
+def get_doc_number(tfidf_df):
     keyword_list = input_keyword() # 入力してキーワードを抽出
 
-    doc_num_list = [] # 文書番号リスト
+    doc_num_dict = {}
     for keyword in keyword_list:
+        doc_num_list = [] # 文書番号リスト
+        df = tfidf_df
         try:
-            doc_num = df[keyword].idxmax()
+            for i in range(10):
+                print(i, end=' ')
+                doc_num = df[keyword].idxmax()
+                df = df.drop(doc_num)
+                doc_num_list.append(doc_num)
+            doc_num_dict[keyword] = doc_num_list
         except:
             print('キーワード: {} は文書の中にありませんでした'.format(keyword))
             continue
-        doc_num_list.append(doc_num)
 
-    return doc_num_list
+    return doc_num_dict
     
-
 def main():
     # テキストから記事のタイトルと内容を取得
     title_list, doc_list = read_doc_txt('../data_file/raw/doc_set.txt')
@@ -244,13 +244,17 @@ def main():
     article_dict = generate_article_dict(new_title_list, new_doc_list)
     
     # 単語文書行列を作成
-    freq_word_list = generate_df(article_dict)
+    # freq_word_list = generate_df(article_dict)
 
     # tf-idf
     tfidf_df = calc_tfidf(article_dict)
 
-    doc_num_list = get_doc_number(tfidf_df)
-    print(doc_num_list)
+    # save
+    print('save')
+    tfidf_df.to_csv('/Users/furuhama/Desktop/task2-1_tfidf_result.txt', index=False)
+
+    # doc_num_dict = get_doc_number(tfidf_df)
+    # print(doc_num_dict)
 
 if __name__ == "__main__":
     main()

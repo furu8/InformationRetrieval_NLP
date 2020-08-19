@@ -943,7 +943,7 @@ the
 weather
 starts
 turning
-colder:
+colder
 snow
 begins
 to
@@ -2462,7 +2462,7 @@ herself
 between
 elsa
 and
-hans;
+hans
 she
 freezes
 solid
