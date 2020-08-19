@@ -205,31 +205,6 @@ def calc_tfidf(article_dict):
     tfidf_df = pd.DataFrame(tfidf_list, columns=tv.get_feature_names())
 
     return tfidf_df
-
-def input_keyword():
-    search_word = input('your search input: ') # 入力はスペース区切り
-    keyword_list = [word for word in search_word.split(' ')]
-    return keyword_list
-
-def get_doc_number(tfidf_df):
-    keyword_list = input_keyword() # 入力してキーワードを抽出
-
-    doc_num_dict = {}
-    for keyword in keyword_list:
-        doc_num_list = [] # 文書番号リスト
-        df = tfidf_df
-        try:
-            for i in range(10):
-                print(i, end=' ')
-                doc_num = df[keyword].idxmax()
-                df = df.drop(doc_num)
-                doc_num_list.append(doc_num)
-            doc_num_dict[keyword] = doc_num_list
-        except:
-            print('キーワード: {} は文書の中にありませんでした'.format(keyword))
-            continue
-
-    return doc_num_dict
     
 def main():
     # テキストから記事のタイトルと内容を取得
