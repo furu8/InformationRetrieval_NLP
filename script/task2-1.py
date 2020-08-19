@@ -190,7 +190,7 @@ def generate_article_dict(title_list, doc_list):
     # 辞書型にして返却
     return make_article_dict(title_list, article_list)
 
-def calc_tf_idf(article_dict):
+def calc_tfidf(article_dict):
     # ストップワード
     df_stop = read_stop_words('../data_file/raw/stop_words_list(UTF-8).txt')
     stop_words = list(df_stop.values.flatten())
@@ -211,23 +211,24 @@ def calc_tf_idf(article_dict):
 
     return tfidf_df
 
-def input_keyword(df):
+def input_keyword():
     search_word = input('your search input: ') # 入力はスペース区切り
-    keyword_list = [word for word in search_word.split.[' ']]
+    keyword_list = [word for word in search_word.split(' ')]
     return keyword_list
 
-def get_doc_number(df)
-    keyword_list = input_keyword(df) # 入力してキーワードを抽出
+def get_doc_number(df):
+    keyword_list = input_keyword() # 入力してキーワードを抽出
 
     doc_num_list = [] # 文書番号リスト
     for keyword in keyword_list:
         try:
             doc_num = df[keyword].idxmax()
-        except expression:
-            print('そのキーワードはこの記事の中にありませんでした')
+        except:
+            print('キーワード: {} は文書の中にありませんでした'.format(keyword))
             continue
         doc_num_list.append(doc_num)
 
+    return doc_num_list
     
 
 def main():
@@ -243,12 +244,13 @@ def main():
     article_dict = generate_article_dict(new_title_list, new_doc_list)
     
     # 単語文書行列を作成
-    # freq_word_list = generate_df(article_dict)
+    freq_word_list = generate_df(article_dict)
 
     # tf-idf
-    tfidf_df = calc_tf_idf(article_dict)
+    tfidf_df = calc_tfidf(article_dict)
 
-
+    doc_num_list = get_doc_number(tfidf_df)
+    print(doc_num_list)
 
 if __name__ == "__main__":
     main()
