@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import re
 from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.feature_extraction.text import TfidfVectorizer
 
 def print_preprocessing_debug(doc_list):
     # print('# https') # https
@@ -147,7 +148,7 @@ def generate_df(article_dict):
     freq_word_df = pd.DataFrame(freq_word_list, columns=cv.get_feature_names())
     # print(freq_word_df)
 
-    return freq_word_df
+    return freq_word_list
 
 def make_article_dict(title_list, article_list):
     article_dict = {title: article for title, article in zip(title_list, article_list)}
@@ -189,8 +190,45 @@ def generate_article_dict(title_list, doc_list):
     # 辞書型にして返却
     return make_article_dict(title_list, article_list)
 
-def calc_tf_idf(df):
-    pass
+def calc_tf_idf(article_dict):
+    # ストップワード
+    df_stop = read_stop_words('../data_file/raw/stop_words_list(UTF-8).txt')
+    stop_words = list(df_stop.values.flatten())
+
+    # 単語の出現回数をカウント
+    doc_list = np.array(list(article_dict.values()))
+    cv = CountVectorizer(stop_words=stop_words)
+    cv.fit(doc_list)
+    freq_word_list = cv.transform(doc_list).toarray()
+
+    # 単語のTF-IDFを計算
+    tv = TfidfVectorizer(stop_words=stop_words)
+    tv.fit(doc_list)
+    tfidf_list = tv.transform(doc_list).toarray()
+
+    # データフレーム形式で先頭5行まで表示
+    tfidf_df = pd.DataFrame(tfidf_list, columns=tv.get_feature_names())
+
+    return tfidf_df
+
+def input_keyword(df):
+    search_word = input('your search input: ') # 入力はスペース区切り
+    keyword_list = [word for word in search_word.split.[' ']]
+    return keyword_list
+
+def get_doc_number(df)
+    keyword_list = input_keyword(df) # 入力してキーワードを抽出
+
+    doc_num_list = [] # 文書番号リスト
+    for keyword in keyword_list:
+        try:
+            doc_num = df[keyword].idxmax()
+        except expression:
+            print('そのキーワードはこの記事の中にありませんでした')
+            continue
+        doc_num_list.append(doc_num)
+
+    
 
 def main():
     # テキストから記事のタイトルと内容を取得
@@ -205,12 +243,12 @@ def main():
     article_dict = generate_article_dict(new_title_list, new_doc_list)
     
     # 単語文書行列を作成
-    freq_word_df = generate_df(article_dict)
+    # freq_word_list = generate_df(article_dict)
 
     # tf-idf
-    calc_tf_idf(freq_word_df)
+    tfidf_df = calc_tf_idf(article_dict)
 
-    
+
 
 if __name__ == "__main__":
     main()
