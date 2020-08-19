@@ -74,13 +74,21 @@ def replace_apostrophe(doc):
     return re.sub(r'[‘’]', "'", doc)
 
 def remove_en(doc):
-    return re.sub(r'[~`!@#$%^&*()\-━+={}|.,<>/?:;"[\]\'\\]', "", doc)
+    return re.sub(r'[~`!@#$%^&*()\-━_+={}|.,<>/?:;"[\]\'\\]', "", doc)
 
 def remove_em(doc):
-    return re.sub(r'[︰”「」@]', "", doc)
+    return re.sub(r'[︰”「」@＿]', "", doc)
 
 def remove_int(doc):
-    return re.sub(r'[0-9]+', "", doc)
+    return re.sub(r'[0-9]*', "", doc)
+
+def remove_atoz(doc):
+    atoz_list = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z']
+
+    for atoz in atoz_list:
+        doc = re.sub(r'%s{3,5}' % atoz, "", doc)
+
+    return doc
 
 def remove_word(doc):
     """
@@ -104,6 +112,9 @@ def remove_word(doc):
     # 数字削除
     new_doc = remove_int(new_doc)
 
+    # 繰り返しを削除
+    new_doc = remove_atoz(new_doc)
+
     return new_doc
 
 def preprocessing_doc(doc_list):
@@ -114,10 +125,7 @@ def preprocessing_doc(doc_list):
     doc_lower_list = [doc.lower() for doc in doc_list]
     
     # 記号除去
-    doc_sym_list = [remove_word(doc) for doc in doc_lower_list]
-
-    # \xa0を除去
-    new_doc_list = [doc.replace('\xa0', ' ') for doc in doc_sym_list]
+    new_doc_list = [remove_word(doc) for doc in doc_lower_list]
 
     return new_doc_list
 
@@ -211,6 +219,28 @@ def calc_tfidf(article_dict):
     tfidf_df = pd.DataFrame(tfidf_list, columns=tv.get_feature_names())
 
     return tfidf_df
+
+def input_keyword():
+    search_word = input('your search input: ') # 入力はスペース区切り
+    keyword_list = [word for word in search_word.split(' ')]
+    return keyword_list
+
+def get_search_result(df):
+    """
+    入力したキーワードから、tfidf値が大きい上位10件を抽出
+    """
+    keyword_list = input_keyword() # 入力してキーワードを抽出
+
+    doc_num_dict = {}
+    for keyword in keyword_list:
+        try:
+            print(df[keyword].sort_values(ascending=False).values[:10])
+            doc_num_dict[keyword] = df[keyword].sort_values(ascending=False)[:10]
+        except:
+            print('キーワード: {} は文書の中にありませんでした'.format(keyword))
+            continue
+
+    return doc_num_dict, keyword_list
     
 def main():
     # テキストから記事のタイトルと内容を取得
@@ -229,13 +259,14 @@ def main():
 
     # tf-idf
     tfidf_df = calc_tfidf(article_dict)
+    # new_tfidf_df = tfidf_df.iloc[:, :-4309] # 邪道だが、重すぎるので除去して抽出
 
     # save
-    print('save')
-    tfidf_df.to_csv('/Users/furuhama/Desktop/task2-1_tfidf_result.txt', index=False)
+    # print('save') 
+    # new_tfidf_df.to_csv('/Users/furuhama/Desktop/task2-1_tfidf_result.txt', index=False)　# 重すぎるので注意
 
-    # doc_num_dict = get_doc_number(tfidf_df)
-    # print(doc_num_dict)
+    doc_num_dict, keyword_list = get_search_result(tfidf_df)
+    print(doc_num_dict)
 
 if __name__ == "__main__":
     main()
