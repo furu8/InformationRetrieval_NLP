@@ -5,6 +5,9 @@ from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.feature_extraction.text import TfidfVectorizer
 
 def print_preprocessing_debug(doc_list):
+    """
+    前処理の前後の結果を出力してみてチェック
+    """
     # print('# https') # https
     # print(doc_list[261134])
     # print(re.sub(r'https?://[\w/:%#\$&\?\(\)~\.=\+\-…]+', "", doc_list[261134]))
@@ -49,6 +52,9 @@ def print_preprocessing_debug(doc_list):
     # print(re.sub(r'[\n]', "", doc_list[2]))
 
 def read_doc_txt(path):
+    """
+    読み込んだテキストをタイトルと文書それぞれリストとして持って返す
+    """
     with open(path, 'r') as f:
         doc_list = f.readlines()
         # 記事のタイトルだけ抽出（index番号が文書番号となる）
@@ -68,10 +74,6 @@ def remove_url(doc):
 
 def remove_newline(doc):
     return re.sub(r'[\n]', "", doc)
-
-def replace_apostrophe(doc):
-    # 置換すればpeople’sがpeople'sとして扱えるが、'mental enslavement'などが残る
-    return re.sub(r'[‘’]', "'", doc)
 
 def remove_en(doc):
     return re.sub(r'[~`!@#$%^&*()\-━_+={}|.,<>/?:;"[\]\'\\]', "", doc)
@@ -94,14 +96,11 @@ def remove_word(doc):
     """
     不要な記号を除去
     """
-    # \\n削除
+    # \n削除
     new_doc = remove_newline(doc)
 
     # https
     new_doc = remove_url(new_doc)
-
-    # [‘]と[’]を[']に置換
-    # new_doc = replace_apostrophe(new_doc)
     
     # 半角記号
     new_doc = remove_en(new_doc)
@@ -110,7 +109,7 @@ def remove_word(doc):
     new_doc = remove_em(new_doc)
 
     # 数字削除
-    new_doc = remove_int(new_doc)
+    # new_doc = remove_int(new_doc) # バグが発生するのでコメントアウト
 
     # 繰り返しを削除
     new_doc = remove_atoz(new_doc)
@@ -124,11 +123,12 @@ def preprocessing_doc(doc_list):
     # 小文字変換
     doc_lower_list = [doc.lower() for doc in doc_list]
     
-    # 記号除去
+    # 記号などを除去
     new_doc_list = [remove_word(doc) for doc in doc_lower_list]
 
     return new_doc_list
 
+# 使ってない
 def make_word_index(doc_list):
     """
     全記事の内容から、単語を抽出し、重複と空白は削除
@@ -144,6 +144,7 @@ def make_word_index(doc_list):
 
     return word_index_list
 
+# 使ってない
 def generate_df(article_dict):
     """
     単語文書行列を作成
@@ -231,16 +232,30 @@ def get_search_result(df):
     """
     keyword_list = input_keyword() # 入力してキーワードを抽出
 
-    doc_num_dict = {}
+    new_keyword_list = [] # 文書中にあったキーワードだけ追加
+    doc_num_dict = {} # 上位10件のtfidf値をキーワードごとの辞書に格納
     for keyword in keyword_list:
         try:
-            print(df[keyword].sort_values(ascending=False).values[:10])
             doc_num_dict[keyword] = df[keyword].sort_values(ascending=False)[:10]
+            new_keyword_list.append(keyword)
+            print('キーワード: {} は文書の中にありました'.format(keyword))
         except:
             print('キーワード: {} は文書の中にありませんでした'.format(keyword))
             continue
 
-    return doc_num_dict, keyword_list
+    return doc_num_dict, new_keyword_list
+
+def print_search_result(doc_num_dict, keyword, title_list, article_dict):
+    result_df = pd.DataFrame(columns=['doc_ID', 'title', 'tfidf', 'doc_exp'])
+    result_df['doc_ID'] = doc_num_dict[keyword].index.values
+    result_df['title'] = [title_list[doc_id] for doc_id in result_df['doc_ID'].values]
+    result_df['tfidf'] = doc_num_dict[keyword].values
+    result_df['doc_exp'] = [article_dict[title] for title in result_df['title'].values]
+
+    print('\n入力キーワード: {}'.format(keyword))
+    print(result_df)
+
+    return result_df
     
 def main():
     # テキストから記事のタイトルと内容を取得
@@ -253,20 +268,23 @@ def main():
     
     # 記事辞書の作成
     article_dict = generate_article_dict(new_title_list, new_doc_list)
-    
+
     # 単語文書行列を作成
     # freq_word_list = generate_df(article_dict)
 
-    # tf-idf
+    # tf-idfを計算
     tfidf_df = calc_tfidf(article_dict)
-    # new_tfidf_df = tfidf_df.iloc[:, :-4309] # 邪道だが、重すぎるので除去して抽出
-
-    # save
-    # print('save') 
+    # print('save') # save
     # new_tfidf_df.to_csv('/Users/furuhama/Desktop/task2-1_tfidf_result.txt', index=False)　# 重すぎるので注意
 
+    # 検索結果を取得
     doc_num_dict, keyword_list = get_search_result(tfidf_df)
-    print(doc_num_dict)
+
+    # 検索結果を表示・保存
+    for keyword in keyword_list:
+        result_df = print_search_result(doc_num_dict, keyword, new_title_list, article_dict)
+        print('save') # save
+        result_df.to_csv('../data_file/interim/task2-1_result_'+keyword+'.txt', index=False)
 
 if __name__ == "__main__":
     main()
