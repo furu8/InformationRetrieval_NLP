@@ -236,7 +236,7 @@ def get_search_result(df):
     doc_num_dict = {} # 上位10件のtfidf値をキーワードごとの辞書に格納
     for keyword in keyword_list:
         try:
-            doc_num_dict[keyword] = df[keyword].sort_values(ascending=False)[:10]
+            doc_num_dict[keyword] = df[keyword].sort_values(ascending=False)
             new_keyword_list.append(keyword)
             print('キーワード: {} は文書の中にありました'.format(keyword))
         except:
@@ -253,9 +253,9 @@ def print_search_result(doc_num_dict, keyword, title_list, article_dict):
     result_df['doc_exp'] = [article_dict[title] for title in result_df['title'].values]
 
     print('\n入力キーワード: {}'.format(keyword))
-    print(result_df)
+    print(result_df[:10])
 
-    return result_df
+    return result_df[:10]
     
 def main():
     # テキストから記事のタイトルと内容を取得
