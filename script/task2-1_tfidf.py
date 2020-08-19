@@ -79,7 +79,10 @@ def remove_en(doc):
 def remove_em(doc):
     return re.sub(r'[︰”「」@]', "", doc)
 
-def remove_symbol_word(doc):
+def remove_int(doc):
+    return re.sub(r'[0-9]+', "", doc)
+
+def remove_word(doc):
     """
     不要な記号を除去
     """
@@ -98,6 +101,9 @@ def remove_symbol_word(doc):
     # 全角記号
     new_doc = remove_em(new_doc)
 
+    # 数字削除
+    new_doc = remove_int(new_doc)
+
     return new_doc
 
 def preprocessing_doc(doc_list):
@@ -108,7 +114,7 @@ def preprocessing_doc(doc_list):
     doc_lower_list = [doc.lower() for doc in doc_list]
     
     # 記号除去
-    doc_sym_list = [remove_symbol_word(doc) for doc in doc_lower_list]
+    doc_sym_list = [remove_word(doc) for doc in doc_lower_list]
 
     # \xa0を除去
     new_doc_list = [doc.replace('\xa0', ' ') for doc in doc_sym_list]
